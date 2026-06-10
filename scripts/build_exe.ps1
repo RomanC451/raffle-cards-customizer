@@ -1,4 +1,4 @@
-# Build a Windows .exe for Bingo Card Designer (PyInstaller).
+# Build a Windows .exe for Raffle Ticket Designer (PyInstaller).
 # Run from repo root:  .\scripts\build_exe.ps1
 
 $ErrorActionPreference = "Stop"
@@ -15,8 +15,9 @@ if (-not (Test-Path $Python)) {
     --noconfirm `
     --clean `
     --windowed `
-    --name "Bingo Card Designer" `
+    --name "Raffle Ticket Designer" `
     --add-data "icons;icons" `
+    --add-data "templates;templates" `
     --collect-all customtkinter `
     --hidden-import skia `
     --exclude-module pandas `
@@ -25,4 +26,4 @@ if (-not (Test-Path $Python)) {
 
 Write-Host ""
 Write-Host "Done. Executable:" -ForegroundColor Green
-Write-Host "  $Root\dist\Bingo Card Designer\Bingo Card Designer.exe"
+Write-Host "  $Root\dist\Raffle Ticket Designer\Raffle Ticket Designer.exe"

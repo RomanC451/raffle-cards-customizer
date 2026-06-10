@@ -1,12 +1,115 @@
 import os
 import tkinter as tk
+from collections.abc import Callable
 from ctypes import wintypes
 import ctypes
 
 import customtkinter as ctk
 from PIL import Image, ImageTk
 
+from bingo_cards.config import (
+    STEPPER_HOLD_ACCELERATION,
+    STEPPER_HOLD_INITIAL_DELAY_MS,
+    STEPPER_HOLD_MIN_INTERVAL_MS,
+    STEPPER_HOLD_START_INTERVAL_MS,
+)
 from bingo_cards.ui.toolbar_icons import dim_toolbar_icon
+
+
+def next_hold_repeat_interval_ms(
+    current_interval_ms: int,
+    *,
+    min_interval_ms: int = STEPPER_HOLD_MIN_INTERVAL_MS,
+    acceleration_factor: float = STEPPER_HOLD_ACCELERATION,
+) -> int:
+    accelerated = int(current_interval_ms * acceleration_factor)
+    return max(min_interval_ms, accelerated)
+
+
+class HoldRepeatController:
+    def __init__(
+        self,
+        widget,
+        on_step: Callable[[], bool],
+        *,
+        initial_delay_ms: int = STEPPER_HOLD_INITIAL_DELAY_MS,
+        start_interval_ms: int = STEPPER_HOLD_START_INTERVAL_MS,
+        min_interval_ms: int = STEPPER_HOLD_MIN_INTERVAL_MS,
+        acceleration_factor: float = STEPPER_HOLD_ACCELERATION,
+    ):
+        self.widget = widget
+        self.on_step = on_step
+        self.initial_delay_ms = initial_delay_ms
+        self.start_interval_ms = start_interval_ms
+        self.min_interval_ms = min_interval_ms
+        self.acceleration_factor = acceleration_factor
+        self._initial_after_id: str | None = None
+        self._repeat_after_id: str | None = None
+        self._interval_ms = start_interval_ms
+        self._release_bind_id: str | None = None
+        self._bind_press_targets(widget)
+
+    def _bind_press_targets(self, widget) -> None:
+        widget.bind("<Button-1>", self._on_press, add="+")
+        for child in widget.winfo_children():
+            child.bind("<Button-1>", self._on_press, add="+")
+
+    def _on_press(self, _event):
+        if not self._is_enabled():
+            return
+        if not self.on_step():
+            return
+        self._stop_timers()
+        self._interval_ms = self.start_interval_ms
+        self._initial_after_id = self.widget.after(
+            self.initial_delay_ms, self._start_repeating
+        )
+        root = self.widget.winfo_toplevel()
+        self._release_bind_id = root.bind(
+            "<ButtonRelease-1>", self._on_release, add="+"
+        )
+
+    def _is_enabled(self) -> bool:
+        try:
+            return str(self.widget.cget("state")) != "disabled"
+        except tk.TclError:
+            return True
+
+    def _start_repeating(self) -> None:
+        self._initial_after_id = None
+        self._repeat_tick()
+
+    def _repeat_tick(self) -> None:
+        if not self.on_step():
+            self._stop()
+            return
+        self._interval_ms = next_hold_repeat_interval_ms(
+            self._interval_ms,
+            min_interval_ms=self.min_interval_ms,
+            acceleration_factor=self.acceleration_factor,
+        )
+        self._repeat_after_id = self.widget.after(self._interval_ms, self._repeat_tick)
+
+    def _on_release(self, _event) -> None:
+        self._stop()
+
+    def _stop_timers(self) -> None:
+        for after_id in (self._initial_after_id, self._repeat_after_id):
+            if after_id is not None:
+                self.widget.after_cancel(after_id)
+        self._initial_after_id = None
+        self._repeat_after_id = None
+
+    def _stop(self) -> None:
+        self._stop_timers()
+        if self._release_bind_id is not None:
+            root = self.widget.winfo_toplevel()
+            root.unbind("<ButtonRelease-1>", self._release_bind_id)
+            self._release_bind_id = None
+
+
+def bind_hold_repeat(widget, on_step: Callable[[], bool]) -> HoldRepeatController:
+    return HoldRepeatController(widget, on_step)
 
 
 def get_windows_work_area() -> tuple[int, int, int, int] | None:

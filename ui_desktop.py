@@ -1,4 +1,4 @@
-"""Desktop entry point for the bingo card designer."""
+"""Desktop entry point for the raffle ticket designer."""
 
 import sys
 from pathlib import Path
@@ -8,7 +8,7 @@ if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
 try:
-    from bingo_cards.ui import BingoDesktopApp
+    from bingo_cards.ui import RaffleDesktopApp
 except ModuleNotFoundError as error:
     venv_python = _ROOT / ".venv" / "Scripts" / "python.exe"
     hint = (
@@ -22,5 +22,5 @@ except ModuleNotFoundError as error:
     raise SystemExit(1) from error
 
 if __name__ == "__main__":
-    app = BingoDesktopApp()
+    app = RaffleDesktopApp()
     app.mainloop()

@@ -1,17 +1,17 @@
-from bingo_cards.render.card import (
-    build_preview,
-    draw_free_image_in_cell,
-    draw_text_in_cell,
-    get_placeholder_matrix,
-    is_free_cell_text,
-    wrap_text,
+from bingo_cards.render.raffle import (
+    build_raffle_preview,
+    build_raffle_ticket,
+    default_number_rectangle,
+    format_ticket_number,
+    load_digit_images,
+    validate_ticket_sequence,
 )
 
 __all__ = [
-    "build_preview",
-    "draw_free_image_in_cell",
-    "draw_text_in_cell",
-    "get_placeholder_matrix",
-    "is_free_cell_text",
-    "wrap_text",
+    "build_raffle_preview",
+    "build_raffle_ticket",
+    "default_number_rectangle",
+    "format_ticket_number",
+    "load_digit_images",
+    "validate_ticket_sequence",
 ]

@@ -217,9 +217,6 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 
-# Torrent files
-*.torrent
-
 # Project-generated artifacts
 *.pdf
 output_cards/

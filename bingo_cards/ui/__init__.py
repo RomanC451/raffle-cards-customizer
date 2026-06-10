@@ -1,3 +1,3 @@
-from bingo_cards.ui.app import BingoDesktopApp
+from bingo_cards.ui.app import RaffleDesktopApp
 
-__all__ = ["BingoDesktopApp"]
+__all__ = ["RaffleDesktopApp"]

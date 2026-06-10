@@ -1,1 +1,1 @@
-"""Bingo card designer: PDF intake, grid placement, rendering, desktop UI."""
+"""Raffle ticket designer: template compositing and desktop UI."""
